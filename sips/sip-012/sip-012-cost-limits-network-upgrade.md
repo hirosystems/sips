@@ -1,39 +1,41 @@
-# Preamble
+# Burn height selection for network-upgrade to introduce new cost-limits
 
-SIP Number: 012
+## Preamble
 
-Title: Burn height selection for network-upgrade to introduce new cost-limits
+**SIP Number:** `012`
 
-Authors:
+**Title:** Burn height selection for network-upgrade to introduce new cost-limits
+
+**Authors:**
+
 * Diwaker Gupta <diwaker@hiro.so>
 * Aaron Blankstein <aaron@hiro.so>
 * Ludovic Galabru <ludo@hiro.so>
+* Asteria <asteria@syvita.org>
 
-Consideration: Governance, Technical
+**Consideration:** Governance, Technical
 
-Type: Consensus
+**Type:** Consensus
 
-Status: Draft
+**Status:** Draft
 
-Created: 2021-10-08
+**Created:** 2021-10-08
 
-License: BSD 2-Clause
+**License:** Creative Commons CC0 1.0 Universal
 
-Sign-off:
+**Sign-off:**
 
-Discussions-To: https://github.com/stacksgov/sips
+**Discussions-To:** https://github.com/stacksgov/sips
 
-# Abstract
+## Abstract
 
 The current Clarity cost limits were set very conservatively in Stacks 2.0: transactions with contract-calls frequently exceed these limits, which negatively affects transaction throughput. This SIP proposes an update to these cost-limits via a network upgrade and further, that the network upgrade be executed at a block height chosen by an off-chain process described in this SIP.
 
-
-# License and Copyright
+## License and Copyright
 
 This SIP is made available under the terms of the Creative Commons CC0 1.0 Universal license, available at https://creativecommons.org/publicdomain/zero/1.0/ This SIP’s copyright is held by the Stacks Open Internet Foundation.
 
-
-# Introduction
+## Introduction
 
 Blocks on the Stacks blockchain tend to have anywhere between 10 to 50 transactions per block -- this is lower than the demands of many workloads and also lower than the theoretical maximum one would expect. On the other hand, the mempool consistently has hundreds of valid transactions pending at any given time; at peak there have been several thousand pending transactions. So what is preventing more transactions from being included in blocks?
 
@@ -45,14 +47,13 @@ Any modification of cost-limits is a consensus-breaking change. There seems to b
 
 This SIP posits that the ongoing network congestion warrants a more expedient route to change the cost-limits, one that does not rely on an on-chain voting contract.
 
+## Specification
 
-# Specification
-
-## Assumptions
+### Assumptions
 
 This SIP is a method of last resort, considering the circumstances an exception is justified. All future network upgrades should use the voting contract (if appropriate); all hard-forks must follow the process described in SIP-000.
 
-## Proposal
+### Proposal
 
 The Stacks Foundation or the governance group should choose a Bitcoin block height for the network upgrade. The block number should be at least 3 calendar weeks out from when this SIP transitions into “Accepted” state, so as to provide sufficient heads up to node operators.
 
@@ -64,16 +65,17 @@ Miners, developers, Stackers and community members can demonstrate their support
 The SIP will be considered Recommended if wallets indicating support for the upgrade (through either mechanism) add up to > 10% of circulating supply of STX (approx 120M).
 
 In terms of how these cost-limits would actually be applied, this SIP proposes the following:
+
 * Add new functionality to stacks-blockchain that uses the current cost-limits by default and uses new cost-limits if the burn block height exceeds a configurable parameter (could be a compile time configuration to avoid runtime issues)
 * Once a BTC block number has been determined, ship a new stacks-blockchain release at least one week before to give miners and node operators time to upgrade before the upgrade block height is reached
 * In the subsequent release, remove all usage of the old cost-limits and just use the new cost-limits by default
 
-### Default Cost Functions
+#### Default Cost Functions
 
 Based on results from the [clarity-benchmarking](https://github.com/blockstack/clarity-benchmarking) project, we propose
 new default cost functions. The new costs are supplied in the form of a new Clarity smart contract in [Appendix A](#appendix-a).
 
-### Block Limit Changes
+#### Block Limit Changes
 
 In addition to the runtime cost changes, we propose increasing the
 block limits for MARF reads and writes. Based on the expected performance
@@ -90,7 +92,7 @@ pub const BLOCK_LIMIT_MAINNET: ExecutionCost = ExecutionCost {
 };
 ```
 
-### Changes to Static vs. Dynamic Tabulation of Costs
+#### Changes to Static vs. Dynamic Tabulation of Costs
 
 The cost assessment in Clarity for most data-handling functions (e.g.,
 `map-get?`) use the static cost of the fetch rather than the dynamic
@@ -117,7 +119,7 @@ maps, but in practice the stored lists are relatively short.
 
 Because of this, we propose to use a dynamic cost for these assessments.
 
-### Bitcoin Support Indication
+#### Bitcoin Support Indication
 
 For wallets that wish to submit a supporting vote for the activation of this SIP via a BTC transaction, they can submit a transaction in the following form:
 
@@ -136,18 +138,18 @@ The Bitcoin transaction will include an `OP_RETURN` output for the first Bitcoin
 
 That is, the `OP_RETURN` output will be a 9-byte field with content equal to `XMASIP-12` (ascii encoded).
 
-# Activation
+## Activation
 
 The SIP will be considered Active once:
 
 * A new release of stacks-blockchain is available with the updated cost-limits and a mechanism to use the new cost-limits beyond a pre-determined Bitcoin block height
 * This new release is deployed by independent miners, as determined by the continued operation of the Stacks blockchain beyond the Bitcoin block height selected for the network-upgrade. 
 
-# Appendix A
+## Appendix A
 
 The new proposed `costs-2.05.clar`:
 
-```
+```lisp
 (define-read-only (cost_analysis_type_annotate (n uint))
     (runtime (linear n u3 u12)))
 
