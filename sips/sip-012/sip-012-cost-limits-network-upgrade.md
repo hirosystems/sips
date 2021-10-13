@@ -25,27 +25,31 @@
 
 **Sign-off:**
 
-**Discussions-To:** https://github.com/stacksgov/sips
+**Discussions-To:** [stacksgov/sips](https://github.com/stacksgov/sips)
 
 ## Abstract
 
-The current Clarity cost limits were set very conservatively in Stacks 2.0: transactions with contract calls frequently exceed these limits, which negatively affects transaction throughput. This SIP proposes an update to these cost limits via a network upgrade and further, that the network upgrade be executed at a block height chosen by an off-chain process described in this SIP.
+The current Clarity cost limits were set very conservatively in Stacks 2.0; transactions with contract calls frequently exceed these limits, which negatively affects transaction throughput. 
+
+This SIP proposes an update to these cost limits via a network upgrade and further, that the network upgrade be executed at a block height chosen by an off-chain process described in this SIP.
 
 ## License and Copyright
 
-This SIP is made available under the terms of the Creative Commons CC0 1.0 Universal license, available at https://creativecommons.org/publicdomain/zero/1.0/ This SIP’s copyright is held by the Stacks Open Internet Foundation.
+This SIP is made available under the terms of the Creative Commons CC0 1.0 Universal license, available [here](https://creativecommons.org/publicdomain/zero/1.0/).
+
+This SIP’s copyright is held by the [Stacks Open Internet Foundation](https://stacks.org/).
 
 ## Introduction
 
 Blocks on the Stacks blockchain tend to have anywhere between 10 to 50 transactions per block -- this is lower than the demands of many workloads and also lower than the theoretical maximum one would expect. On the other hand, the mempool consistently has hundreds of valid transactions pending at any given time; at the peak, there have been several thousand pending transactions. So what is preventing more transactions from being included in blocks?
 
-The answer is cost limits. An analysis of “full blocks” (meaning blocks where at least one cost dimension exceeds the block limit -- see SIP-006 for a description of all cost dimensions) found that roughly 72% of those blocks hit the `runtime` limit and ~27% hit the `read_count` limit. Another analysis of all transactions rejected due to cost limits found that 90% of those transactions exceeded the `runtime` limit. So the `runtime` limits are the primary bottleneck right now.
+The answer is **cost limits**. An analysis of “full blocks” (meaning blocks where at least one cost dimension exceeds the block limit -- see SIP-006 for a description of all cost dimensions) found that roughly 72% of those blocks hit the `runtime` limit and ~27% hit the `read_count` limit. Another analysis of all transactions rejected due to cost limits found that 90% of those transactions exceeded the `runtime` limit. So the `runtime` limits are the primary bottleneck right now.
 
 In the last few months, the [clarity-benchmarking](https://github.com/blockstack/clarity-benchmarking) project has done rigorous benchmarking on contemporary hardware to come up with more accurate cost limits, with a focus on the `runtime` limits. The updated cost limits are described in detail in [this forum post](https://forum.stacks.org/t/more-accurate-cost-functions-for-clarity-native-functions/12386).
 
-Any modification of cost limits is a consensus-breaking change. There seems to be broad community support for changing the cost limits, the question is exactly how and when they go into effect. A previous proposal suggested using a voting contract to determine the block height at which a network upgrade, described in detail in [this Github discussion](https://github.com/blockstack/stacks-blockchain/discussions/2845). Unfortunately, this path would take at least 4 months in the best-case scenario.
+Any modification of cost limits is a consensus-breaking change. There seems to be broad community support for changing the cost limits, the question is exactly *how* and *when* they go into effect. A previous proposal suggested using a voting contract to determine the block height at which a network upgrade, described in detail in [this Github discussion](https://github.com/blockstack/stacks-blockchain/discussions/2845). Unfortunately, this path would take at least 4 months in the best-case scenario.
 
-This SIP posits that the ongoing network congestion warrants a more expedient route to change the cost limits, one that does not rely on an on-chain voting contract.
+This SIP decides that the ongoing network congestion warrants a more expedient route to change the cost limits, one that does not rely on an on-chain voting contract. This is a last-resort action that is
 
 ## Specification
 
